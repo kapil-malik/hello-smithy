@@ -1,1 +1,1 @@
-com.kmalik.preprocessors.RemoveBeforeCodegenTransformation
+com.kmalik.preprocessors.TenantAgnosticTransformation

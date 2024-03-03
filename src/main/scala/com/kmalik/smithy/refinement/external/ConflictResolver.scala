@@ -12,10 +12,7 @@ trait ConflictResolver {
 object ConflictResolver {
 
   def apply(value: String): Either[String, ConflictResolver] =
-    Right((existingObj: MyObject, newObj: MyObject) => {
-      print(s"ConflictResolver: $value")
-      existingObj.id == newObj.id
-    })
+    Right((_: MyObject, _: MyObject) => true)
 
   implicit val provider: RefinementProvider[ConflictResolverTag, String, ConflictResolver] =
     Refinement.drivenBy[ConflictResolverTag](

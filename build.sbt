@@ -19,6 +19,6 @@ lazy val root = (project in file("."))
       "com.disneystreaming.smithy4s" %% "smithy4s-core" % smithy4sVersion.value,
       "org.typelevel" %% "cats-effect" % "3.5.3",
     ),
-    Compile / smithy4sModelTransformers += "RemoveBeforeCodegenTransformation",
+    Compile / smithy4sModelTransformers += "TenantAgnosticTransformation",
     Compile / smithy4sAllDependenciesAsJars += (preprocessors / Compile / packageBin).value
   )

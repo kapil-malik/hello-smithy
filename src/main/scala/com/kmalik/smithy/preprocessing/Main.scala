@@ -1,21 +1,42 @@
 package com.kmalik.smithy.preprocessing
 
+import com.kmalik.smithy.preprocessing.TenantsConfig._
+
 object Main {
 
   def main(args: Array[String]): Unit = {
 
-    val service = new MyServiceWithPreprocessingImpl()
+    val service = new MyTenantAwareServiceImpl()
+    listTenants().foreach { tenantId =>
+      println(s"Tenant: $tenantId")
+      println(s"Read allowed: ${isReadAllowed(tenantId)}")
+      println(s"Write allowed: ${isWriteAllowed(tenantId, None)}")
+      println(s"Delete allowed: ${isDeleteAllowed(tenantId)}")
+      println()
 
-    // Writing object with id 1
-    val writeOutput1 = service.myWrite(MyWriteInput(MyObject("1", "data_1")))
-    println(writeOutput1)
+      val tenantContext = MyTenantContext(tenantId)
 
-    // Reading object with id 1
-    val readOutput1 = service.myRead(MyReadInput("1"))
-    println(readOutput1)
+      // Writing object with id 1
+      val writeOutput1 = if (isWriteAllowed(tenantId, None)) {
+        service.myWrite(MyWriteInput(tenantContext, MyObject("1", "data_1"), None))
+      } else {
+        service.myWrite(MyWriteInput(tenantContext, MyObject("1", "data_1"),
+          Some(MyTenantDetails(true, TENANT_TIER.PREMIUM))))
+      }
+      println(writeOutput1)
 
-    // Reading object with id 2 (should fail)
-    val readOutput2 = service.myRead(MyReadInput("2"))
-    println(readOutput2)
+      val readOutput1 = service.myRead(MyReadInput(tenantContext, "1"))
+      println(readOutput1)
+
+      if (isDeleteAllowed(tenantId)) {
+        val deleteOutput1 = service.myDelete(MyDeleteInput(tenantContext, "1"))
+        println(deleteOutput1)
+
+        // read deleted object, should fail
+        val readOutput2 = service.myRead(MyReadInput(tenantContext, "1"))
+        println(readOutput2)
+      }
+
+    }
   }
 }
